@@ -53,7 +53,7 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-bg text-text py-12 px-4">
       <div className="max-w-3xl mx-auto space-y-8">
         <div className="text-center space-y-4">
-          <h1 className="text-3xl font-bold tracking-tight">TwinMind — Live AI Copilot</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Live AI Copilot</h1>
           <div className="max-w-2xl mx-auto space-y-2">
             <p className="text-muted text-sm leading-relaxed">
               To ensure maximum privacy and project sustainability, TwinMind uses a <span className="text-accent font-medium">Bring Your Own Key (BYOK)</span> model. 
