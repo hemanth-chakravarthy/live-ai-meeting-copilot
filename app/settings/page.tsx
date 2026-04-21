@@ -52,9 +52,17 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-bg text-text py-12 px-4">
       <div className="max-w-3xl mx-auto space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Configuration</h1>
-          <p className="text-muted">Align TwinMind behavior with your specific meeting needs</p>
+        <div className="text-center space-y-4">
+          <h1 className="text-3xl font-bold tracking-tight">TwinMind — Live AI Copilot</h1>
+          <div className="max-w-2xl mx-auto space-y-2">
+            <p className="text-muted text-sm leading-relaxed">
+              To ensure maximum privacy and project sustainability, TwinMind uses a <span className="text-accent font-medium">Bring Your Own Key (BYOK)</span> model. 
+              Your Groq API key is stored locally in a secure, encrypted cookie and is never sent to our servers.
+            </p>
+            <p className="text-muted text-xs leading-relaxed italic">
+              Use the configuration below to tune the AI&apos;s behavior. You can adjust how much context the AI remembers and modify the internal prompts to better suit your specific meeting style.
+            </p>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
