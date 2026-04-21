@@ -5,8 +5,11 @@ import { useSessionStore } from '@/lib/store';
 
 export default function SuggestionsColumn() {
   const suggestions = useSessionStore(state => state.suggestions);
+  const settings = useSessionStore(state => state.settings);
+  const isRefreshing = useSessionStore(state => state.isRefreshing);
+  const setIsRefreshing = useSessionStore(state => state.setIsRefreshing);
+  
   const [countdown, setCountdown] = useState(30);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     const countdownInterval = setInterval(() => {
@@ -36,7 +39,11 @@ export default function SuggestionsColumn() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ transcript })
+        body: JSON.stringify({ 
+          transcript, 
+          systemPrompt: settings.suggestionPrompt,
+          contextWindow: settings.suggestionContextWindow
+        })
       });
 
       if (!response.ok) throw new Error('API Error');
@@ -74,7 +81,13 @@ export default function SuggestionsColumn() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ query: text, transcript, chatHistory })
+        body: JSON.stringify({ 
+          query: text, 
+          transcript, 
+          chatHistory,
+          systemPrompt: settings.chatPrompt,
+          contextWindow: settings.chatContextWindow
+        })
       });
 
       if (response.ok) {

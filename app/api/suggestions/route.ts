@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 
 export async function POST(req: NextRequest) {
   try {
-    const { transcript, contextWindow } = await req.json();
+    const { transcript, contextWindow, systemPrompt } = await req.json();
     
     const apiKey = req.cookies.get('groqApiKey')?.value;
     
@@ -21,10 +21,14 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    // Convert transcript array to a readable text block
-    const transcriptText = transcript.map((t: any) => `[${t.timestamp}] ${t.text}`).join('\n');
+    // Slice transcript based on contextWindow (batches of utterances)
+    const windowSize = contextWindow || 10;
+    const recentTranscript = transcript.slice(-windowSize);
     
-    const systemPrompt = `You are an expert AI meeting copilot. 
+    // Convert transcript array to a readable text block
+    const transcriptText = recentTranscript.map((t: any) => `[${t.timestamp}] ${t.text}`).join('\n');
+    
+    const defaultSystemPrompt = `You are an expert AI meeting copilot. 
 Your job is to read the live transcript of a meeting and generate exactly 3 highly relevant suggestions.
 The suggestions must be based ONLY on the provided transcript.
 You MUST output your response in JSON format exactly matching this schema:
@@ -41,6 +45,8 @@ You MUST output your response in JSON format exactly matching this schema:
 
 Generate exactly 3 suggestions that provide the highest value to the user.`;
 
+    const finalSystemPrompt = systemPrompt || defaultSystemPrompt;
+
     const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -50,8 +56,8 @@ Generate exactly 3 suggestions that provide the highest value to the user.`;
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Current Live Transcript:\n\n${transcriptText}\n\nGenerate 3 suggestions in JSON format.` }
+          { role: 'system', content: finalSystemPrompt },
+          { role: 'user', content: `Current Live Transcript (Recent Context):\n\n${transcriptText}\n\nGenerate 3 suggestions in JSON format.` }
         ],
         temperature: 0.5,
         response_format: { type: 'json_object' }

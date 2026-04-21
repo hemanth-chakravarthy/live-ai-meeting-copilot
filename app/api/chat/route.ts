@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 
 export async function POST(req: NextRequest) {
   try {
-    const { query, transcript, chatHistory } = await req.json();
+    const { query, transcript, chatHistory, systemPrompt, contextWindow } = await req.json();
     
     // Get API key from cookies
     const apiKey = req.cookies.get('groqApiKey')?.value;
@@ -22,15 +22,16 @@ export async function POST(req: NextRequest) {
       );
     }
     
-    // Format the transcript context
-    const transcriptText = transcript && transcript.length > 0 
-      ? transcript.map((t: any) => `[${t.timestamp}] ${t.text}`).join('\n')
+    // Format the transcript context (apply context window)
+    const windowSize = contextWindow || 20;
+    const recentTranscript = transcript ? transcript.slice(-windowSize) : [];
+
+    const transcriptText = recentTranscript.length > 0 
+      ? recentTranscript.map((t: any) => `[${t.timestamp}] ${t.text}`).join('\n')
       : "No transcript available yet.";
     
-    const systemPrompt = `You are an expert AI meeting copilot assisting a user during a live meeting.
+    const defaultSystemPrompt = `You are an expert AI meeting copilot assisting a user during a live meeting.
 Your job is to answer the user's questions or expand on their talking points based entirely on the Live Transcript context.
-
-Live Transcript:\n${transcriptText}
 
 Instructions:
 1. Answer concisely but provide deep, actionable insight.
@@ -38,9 +39,11 @@ Instructions:
 3. If the user clicks a suggestion (which comes through as a query), expand on that suggestion with detailed reasoning based heavily on the transcript.
 4. If there is no relevant information in the transcript to answer the question, logically deduce the answer or state that the topic hasn't been covered yet.`;
 
+    const finalSystemPrompt = systemPrompt || defaultSystemPrompt;
+
     // Map chat history so the model has continuity
     const messages = [
-      { role: 'system', content: systemPrompt },
+      { role: 'system', content: `${finalSystemPrompt}\n\nLive Transcript Context:\n${transcriptText}` },
       ...chatHistory.map((m: any) => ({ role: m.role, content: m.content })),
       { role: 'user', content: query }
     ];

@@ -5,6 +5,9 @@ import { useSessionStore } from '@/lib/store';
 
 export default function ChatColumn() {
   const chat = useSessionStore(state => state.chat);
+  const settings = useSessionStore(state => state.settings);
+  const addChatMessage = useSessionStore(state => state.addChatMessage);
+  
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef(null);
 
@@ -37,7 +40,13 @@ export default function ChatColumn() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ query: currentQuery, transcript, chatHistory })
+        body: JSON.stringify({ 
+          query: currentQuery, 
+          transcript, 
+          chatHistory,
+          systemPrompt: settings.chatPrompt,
+          contextWindow: settings.chatContextWindow
+        })
       });
 
       if (response.ok) {

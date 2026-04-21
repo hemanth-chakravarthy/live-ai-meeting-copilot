@@ -4,7 +4,11 @@ import { useSessionStore } from '@/lib/store';
 import { removeApiKey } from '@/app/actions/apiKey';
 
 export default function SessionHeader() {
-  const { transcript, suggestions, chat, clearSession, isRecording } = useSessionStore();
+  const transcript = useSessionStore(state => state.transcript);
+  const suggestions = useSessionStore(state => state.suggestions);
+  const chat = useSessionStore(state => state.chat);
+  const clearSession = useSessionStore(state => state.clearSession);
+  const isRecording = useSessionStore(state => state.isRecording);
 
   const handleEndSession = () => {
     if (window.confirm("Are you sure you want to end the session? This will clear all current transcript data and stop the microphone.")) {
